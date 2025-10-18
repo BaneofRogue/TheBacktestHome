@@ -43,6 +43,7 @@ function setupEventListeners() {
 
 function loadPreset() {
   const file = document.getElementById('presetSelector').value;
+  
 
   fetch(`data/${file}`)
     .then((response) => {
@@ -59,6 +60,9 @@ function loadPreset() {
       }));
       currentIndex = 0;
       candleSeries.setData(priceData.slice(0, 1)); // Start with the first candle
+
+      console.log("Sample priceData:", priceData.slice(0, 5));
+
     })
     .catch((err) => {
       console.error("Error loading data:", err);
@@ -76,26 +80,27 @@ function getTickIncrement() {
 }
 
 function stepForward() {
-  const increment = getTickIncrement(); // how many candles to add per tick
+  const increment = getTickIncrement();
   const nextIndex = currentIndex + increment;
 
-  if (nextIndex < priceData.length) {
-    // Loop through the range to step forward one or more candles
-    for (let i = currentIndex; i < nextIndex; i++) {
-      const dataPoint = priceData[i];
-      candleSeries.update(dataPoint); // append only new candles
-    }
-
-    currentIndex = nextIndex;
-  } else {
-    // Add any remaining candles up to the end
-    for (let i = currentIndex; i < priceData.length; i++) {
-      candleSeries.update(priceData[i]);
-    }
-
-    currentIndex = priceData.length;
-    pausePlayback(); // stop at the end
+  if (currentIndex >= priceData.length) {
+    pausePlayback();
+    return;
   }
+
+  const end = Math.min(nextIndex, priceData.length);
+
+  for (let i = currentIndex; i < end; i++) {
+    const candle = priceData[i];
+    
+    if (candle && candle.time && candle.open != null) {
+      candleSeries.update(candle);
+    } else {
+      console.warn(`[stepForward] Skipping invalid candle at index ${i}:`, candle);
+    }
+  }
+
+  currentIndex = end;
 }
 
 
