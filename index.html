@@ -14,7 +14,7 @@
     <option value="BTCUSD-1m.json">BTCUSD (1m)</option>
   </select>
   <button id="loadPreset">Load</button>
-  
+
   <div>
     <label for="timeframe">Timeframe:</label>
     <select id="timeframe">
@@ -28,9 +28,22 @@
     <button id="play">Play</button>
     <button id="pause">Pause</button>
     <button id="step">Step</button>
-    <label>Speed:
-      <input type="range" id="speed" min="100" max="2000" value="1000">
-    </label>
+    <div>
+      <label for="tickSpeed">Tick Speed (Delay between steps):</label>
+      <select id="tickSpeed">
+        <option value="1000">Every 1 second</option>
+        <option value="500">Every 0.5 seconds</option>
+        <option value="250">Every 0.25 seconds</option>
+      </select>
+
+      <label for="tickIncrement">Tick Increment (Simulated time):</label>
+      <select id="tickIncrement">
+        <option value="1">1 minute per tick</option>
+        <option value="5">5 minutes per tick</option>
+        <option value="15">15 minutes per tick</option>
+      </select>
+    </div>
+
   </div>
 
   <div id="chart" style="height:500px;"></div>
