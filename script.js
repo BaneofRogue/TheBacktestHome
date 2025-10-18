@@ -51,7 +51,7 @@ function loadPreset() {
     })
     .then((json) => {
       priceData = json.map((row) => ({
-        time: Math.floor(new Date(row.timestamp).getTime() / 1000),
+        time: row.timestamp, // UNIX timestamp in seconds — correct format
         open: row.open,
         high: row.high,
         low: row.low,
@@ -66,6 +66,7 @@ function loadPreset() {
     });
 }
 
+
 function getTickDelay() {
   return parseInt(document.getElementById('tickSpeed').value, 10) || 1000;
 }
@@ -75,17 +76,21 @@ function getTickIncrement() {
 }
 
 function stepForward() {
-  const increment = getTickIncrement(); // e.g., 5 minutes
+  const increment = getTickIncrement();
   const nextIndex = currentIndex + increment;
 
+  // Check boundaries
   if (nextIndex < priceData.length) {
-    const slice = priceData.slice(0, nextIndex + 1);
-    candleSeries.setData(slice);
+    for (let i = currentIndex + 1; i <= nextIndex && i < priceData.length; i++) {
+      candleSeries.update(priceData[i]); // append one candle at a time
+    }
+
     currentIndex = nextIndex;
   } else {
-    pausePlayback(); // Stop playback if we've reached the end
+    pausePlayback();
   }
 }
+
 
 function playPlayback() {
   if (!playInterval) {
