@@ -36,3 +36,17 @@ function updateChart(data) {
 
   candleSeries.setData(chartData);
 }
+
+document.getElementById('loadPreset').addEventListener('click', () => {
+  const file = document.getElementById('presetSelector').value;
+  fetch(`data/${file}`)
+    .then(response => response.json())
+    .then(json => {
+      // json is now your candle array
+      priceData = json;
+      currentIndex = 0;
+
+      // Set all candles at once or begin playback
+      candleSeries.setData(priceData.slice(0, 1)); // Show the first candle
+    });
+});

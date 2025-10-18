@@ -8,12 +8,13 @@
 <body>
   <h1>Stock Market Backtester</h1>
 
-  <div>
-    <label for="filePicker">Upload CSV:</label>
-    <input type="file" id="filePicker" accept=".csv" />
-    <button id="useSampleData">Use Sample Dataset</button>
-  </div>
-
+  <select id="presetSelector">
+    <option value="AAPL-1m.json">AAPL (1m)</option>
+    <option value="TSLA-1m.json">TSLA (1m)</option>
+    <option value="BTCUSD-1m.json">BTCUSD (1m)</option>
+  </select>
+  <button id="loadPreset">Load</button>
+  
   <div>
     <label for="timeframe">Timeframe:</label>
     <select id="timeframe">
