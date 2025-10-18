@@ -1,2 +1,2 @@
-# TheBacktestHero.github.io
+# TheBacktestHero
 A backtesting tool created for student's in Montgomery College's Investment Strategies Club.
