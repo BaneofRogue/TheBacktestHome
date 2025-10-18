@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Backtesting Home</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Stock Market Backtester</h1>
+
+  <div>
+    <label for="filePicker">Upload CSV:</label>
+    <input type="file" id="filePicker" accept=".csv" />
+    <button id="useSampleData">Use Sample Dataset</button>
+  </div>
+
+  <div>
+    <label for="timeframe">Timeframe:</label>
+    <select id="timeframe">
+      <option value="1">1m</option>
+      <option value="5">5m</option>
+      <option value="15">15m</option>
+      <option value="60">1h</option>
+    </select>
+
+    <button id="randomStart">Start at Random Date</button>
+    <button id="play">Play</button>
+    <button id="pause">Pause</button>
+    <button id="step">Step</button>
+    <label>Speed:
+      <input type="range" id="speed" min="100" max="2000" value="1000">
+    </label>
+  </div>
+
+  <div id="chart" style="height:500px;"></div>
+
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
