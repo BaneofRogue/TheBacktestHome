@@ -28,6 +28,7 @@
     <button id="play">Play</button>
     <button id="pause">Pause</button>
     <button id="step">Step</button>
+
     <div>
       <label for="tickSpeed">Tick Speed (Delay between steps):</label>
       <select id="tickSpeed">
@@ -43,12 +44,14 @@
         <option value="15">15 minutes per tick</option>
       </select>
     </div>
-
   </div>
 
   <div id="chart" style="height:500px;"></div>
 
-  <script src="script.js"></script>
   <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/playback.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
