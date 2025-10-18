@@ -76,20 +76,28 @@ function getTickIncrement() {
 }
 
 function stepForward() {
-  const increment = getTickIncrement();
+  const increment = getTickIncrement(); // how many candles to add per tick
   const nextIndex = currentIndex + increment;
 
-  // Check boundaries
   if (nextIndex < priceData.length) {
-    for (let i = currentIndex + 1; i <= nextIndex && i < priceData.length; i++) {
-      candleSeries.update(priceData[i]); // append one candle at a time
+    // Loop through the range to step forward one or more candles
+    for (let i = currentIndex; i < nextIndex; i++) {
+      const dataPoint = priceData[i];
+      candleSeries.update(dataPoint); // append only new candles
     }
 
     currentIndex = nextIndex;
   } else {
-    pausePlayback();
+    // Add any remaining candles up to the end
+    for (let i = currentIndex; i < priceData.length; i++) {
+      candleSeries.update(priceData[i]);
+    }
+
+    currentIndex = priceData.length;
+    pausePlayback(); // stop at the end
   }
 }
+
 
 
 function playPlayback() {
