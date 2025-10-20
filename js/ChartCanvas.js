@@ -71,13 +71,18 @@ export default class ChartCanvas {
   loadCandles(data) {
     this.candles.setData(data);
 
-    // determine price range dynamically
-    const prices = data.flatMap(c => [c.high, c.low]);
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
+    // compute min/max safely
+    let minPrice = Infinity;
+    let maxPrice = -Infinity;
+    for (const c of data) {
+        if (c.low < minPrice) minPrice = c.low;
+        if (c.high > maxPrice) maxPrice = c.high;
+    }
+
     this.priceRange.min = minPrice;
     this.priceRange.max = maxPrice;
   }
+
 
   _drawLoop() {
     const ctx = this.mainCtx;
