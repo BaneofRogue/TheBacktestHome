@@ -1,23 +1,29 @@
 html, body {
   margin: 0;
+  padding: 0;
   height: 100%;
+  width: 100%;
   overflow: hidden;
 }
 
 #chartContainer {
   display: flex;
-  height: 100%;
   width: 100%;
+  height: 100%;
 }
 
 #mainCanvas {
-  flex: 1;           /* fills remaining space */
+  flex-grow: 1;        /* fills remaining space */
+  flex-shrink: 1;      /* can shrink */
+  flex-basis: 0;       /* important: flex fills correctly */
   background: #ffffff;
   cursor: crosshair;
+  display: block;
 }
 
 #priceCanvas {
-  width: 60px;        /* fixed panel width */
+  width: 60px;          /* fixed width for price panel */
+  flex-shrink: 0;       /* never shrink */
   background: #f0f0f0;
-  flex-shrink: 0;     /* never shrink */
+  display: block;
 }
