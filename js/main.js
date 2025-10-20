@@ -19,7 +19,7 @@ const interactionManager = new InteractionManager(chartRenderer, chartCanvas);
 const playbackManager = new PlaybackManager(chartRenderer);
 
 async function loadPreset(file) {
-  const res = await fetch(`../data/${file}`);
+  const res = await fetch(`data/${file}`);
   const data = await res.json();
   playbackManager.setData(data);
   chartRenderer.setData(data);
