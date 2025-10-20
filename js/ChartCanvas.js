@@ -73,18 +73,14 @@ export default class ChartCanvas {
   loadCandles(data) {
     this.candles.setData(data);
 
-    // compute min/max safely
-    let minPrice = Infinity;
-    let maxPrice = -Infinity;
+    let min = Infinity, max = -Infinity;
     for (const c of data) {
-        if (c.low < minPrice) minPrice = c.low;
-        if (c.high > maxPrice) maxPrice = c.high;
+    if (c.low < min) min = c.low;
+    if (c.high > max) max = c.high;
     }
-
-    this.priceRange.min = minPrice;
-    this.priceRange.max = maxPrice;
-
+    this.priceRange.setRange(min, max);
     this.needsRedraw = true;
+
   }
 
 
