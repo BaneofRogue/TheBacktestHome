@@ -61,7 +61,7 @@ export default class PriceRange {
 
     // Smaller sensitivity
     let zoomFactor = 1 + deltaY * 0.001; // less aggressive
-    zoomFactor = Math.max(0.5, Math.min(2.0, zoomFactor)); // clamp zoom factor
+    zoomFactor = Math.max(0.1, Math.min(1.0, zoomFactor)); // clamp zoom factor
 
     this.pxPerPrice = Math.max(0.1, this.pxPerPriceStart * zoomFactor);
 
