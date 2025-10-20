@@ -1,57 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The Backtesting Home</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Canvas Chart</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Stock Market Backtester</h1>
-
-  <select id="presetSelector">
-    <option value="Nvidia_YTD.json">Nvidia(YTD)</option>
-    <option value="TSLA-1m.json">TSLA (1m)</option>
-    <option value="BTCUSD-1m.json">BTCUSD (1m)</option>
-  </select>
-  <button id="loadPreset">Load</button>
-  <div id="statusContainer" style="margin-top: 6px;">
-    <span id="dataStatus" style="color: red; font-weight: bold;">Not loaded</span>
-  </div>
-
-
-  <div>
-    <label for="timeframe">Timeframe:</label>
-    <select id="timeframe">
-      <option value="1">1m</option>
-      <option value="5">5m</option>
-      <option value="15">15m</option>
-      <option value="60">1h</option>
-    </select>
-
-    <button id="randomStart">Start at Random Date</button>
-    <button id="play">Play</button>
-    <button id="pause">Pause</button>
-    <button id="step">Step</button>
-
-    <div>
-      <label for="tickSpeed">Tick Speed (Delay between steps):</label>
-      <select id="tickSpeed">
-        <option value="1000">Every 1 second</option>
-        <option value="500">Every 0.5 seconds</option>
-        <option value="250">Every 0.25 seconds</option>
-      </select>
-
-      <label for="tickIncrement">Tick Increment (Simulated time):</label>
-      <select id="tickIncrement">
-        <option value="1">1 minute per tick</option>
-        <option value="5">5 minutes per tick</option>
-        <option value="15">15 minutes per tick</option>
-      </select>
-    </div>
-  </div>
-
-  <div id="chart" style="height:500px;"></div>
-
-  <script type="module" src="js/main.js"></script>
+<canvas id="chartCanvas"></canvas>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>
