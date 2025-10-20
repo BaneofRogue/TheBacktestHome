@@ -60,7 +60,7 @@ export default class PriceRange {
       return;
     }
 
-    const deltaY = e.clientY - this.dragStartY; // positive when dragging down
+    const deltaY = e.clientY + this.dragStartY; // positive when dragging down
 
     // exponential mapping -> stable multiplicative zoom
     // k controls sensitivity. Lower k = slower zoom.
