@@ -27,14 +27,17 @@ export default class ChartCanvas {
   }
 
   _resizeCanvas() {
+    // main canvas
     this.mainCanvas.width = this.mainCanvas.clientWidth;
     this.mainCanvas.height = this.mainCanvas.clientHeight;
     this.mainWidth = this.mainCanvas.width;
     this.mainHeight = this.mainCanvas.height;
 
+    // price canvas
     this.priceCanvas.width = this.priceCanvas.clientWidth;
     this.priceCanvas.height = this.priceCanvas.clientHeight;
-  }
+    }
+
 
   _bindEvents() {
     window.addEventListener('resize', () => this._resizeCanvas());

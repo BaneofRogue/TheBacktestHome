@@ -11,7 +11,7 @@ html, body {
 }
 
 #mainCanvas {
-  flex: 1;           /* takes remaining space */
+  flex: 1;           /* fills remaining space */
   background: #ffffff;
   cursor: crosshair;
 }
@@ -19,4 +19,5 @@ html, body {
 #priceCanvas {
   width: 60px;        /* fixed panel width */
   background: #f0f0f0;
+  flex-shrink: 0;     /* never shrink */
 }
