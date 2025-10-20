@@ -18,9 +18,12 @@ export default class ChartCanvas {
     this.dragStart = { x: 0, y: 0 };
     this.mousePos = { x: 0, y: 0 };
 
+    this.needsRedraw = true;
+
     // modular components
     this.crosshair = new Crosshair();
     this.priceRange = new PriceRange();
+    this.priceRange.chart = this;
     this.priceRange.attach(this.priceCanvas, () => this.offsetY);
     this.candles = new Candles();
 
@@ -64,6 +67,7 @@ export default class ChartCanvas {
       if (this.isDragging) {
         this.offsetX = e.clientX - this.dragStart.x;
         this.offsetY = e.clientY - this.dragStart.y;
+        this.needsRedraw = true;
       }
     });
   }
@@ -81,29 +85,35 @@ export default class ChartCanvas {
 
     this.priceRange.min = minPrice;
     this.priceRange.max = maxPrice;
+
+    this.needsRedraw = true;
   }
 
 
   _drawLoop() {
-    const ctx = this.mainCtx;
-    ctx.clearRect(0, 0, this.mainWidth, this.mainHeight);
+    if (this.needsRedraw) {
+        const ctx = this.mainCtx;
+        ctx.clearRect(0, 0, this.mainWidth, this.mainHeight);
 
-    // draw candles
-    this.candles.draw(
-      ctx,
-      this.offsetX,
-      this.offsetY,
-      this.mainWidth,
-      this.mainHeight,
-      this.priceRange.min,
-      this.priceRange.max
-    );
+        // draw only visible candles
+        this.candles.draw(
+          ctx,
+          this.offsetX,
+          this.offsetY,
+          this.mainWidth,
+          this.mainHeight,
+          this.priceRange.min,
+          this.priceRange.max
+        );
 
-    // draw crosshair
-    this.crosshair.draw(ctx, this.mousePos, this.mainWidth, this.mainHeight);
+        // draw crosshair
+        this.crosshair.draw(ctx, this.mousePos, this.mainWidth, this.mainHeight);
 
-    // draw price panel
-    this.priceRange.draw();
+        // draw price panel
+        this.priceRange.draw();
+
+        this.needsRedraw = false;
+    }
 
     requestAnimationFrame(() => this._drawLoop());
   }

@@ -5,6 +5,7 @@ export default class PriceRange {
     this.width = width;
     this.tickCount = tickCount;
     this.zoomFactor = 1.2;
+    this.chart = null;
   }
 
   attach(canvas, getOffsetY) {
@@ -26,14 +27,17 @@ export default class PriceRange {
     const zoomCenter = this.max - (mouseY / this.canvas.height) * range;
 
     if (e.deltaY < 0) { // zoom in
-      const newRange = range / this.zoomFactor;
-      this.min = zoomCenter - (zoomCenter - this.min) / this.zoomFactor;
-      this.max = this.min + newRange;
+        const newRange = range / this.zoomFactor;
+        this.min = zoomCenter - (zoomCenter - this.min) / this.zoomFactor;
+        this.max = this.min + newRange;
     } else { // zoom out
-      const newRange = range * this.zoomFactor;
-      this.min = zoomCenter - (zoomCenter - this.min) * this.zoomFactor;
-      this.max = this.min + newRange;
+        const newRange = range * this.zoomFactor;
+        this.min = zoomCenter - (zoomCenter - this.min) * this.zoomFactor;
+        this.max = this.min + newRange;
     }
+
+    // mark chart for redraw
+    if (this.chart) this.chart.needsRedraw = true;
   }
 
   draw() {
