@@ -1,4 +1,5 @@
 import Crosshair from './canvas/Crosshair.js';
+import PriceRange from './canvas/PriceRange.js';
 
 export default class ChartCanvas {
   constructor(canvasId) {
@@ -15,6 +16,8 @@ export default class ChartCanvas {
 
     // modular components
     this.crosshair = new Crosshair();
+    this.priceRange = new PriceRange();
+    this.priceRange.attach(this.canvas, () => this.offsetY);
 
     this._bindEvents();
     this._drawLoop();
@@ -58,14 +61,15 @@ export default class ChartCanvas {
     ctx.save();
     ctx.translate(this.offsetX, this.offsetY);
 
-    // placeholder for future chart/drawing logic
+    // placeholder chart/drawing
     ctx.fillStyle = '#ddd';
     ctx.fillRect(50, 50, 100, 100);
 
     ctx.restore();
 
-    // draw modular components
+    // draw components
     this.crosshair.draw(ctx, this.mousePos, this.width, this.height);
+    this.priceRange.draw();
 
     requestAnimationFrame(() => this._drawLoop());
   }
