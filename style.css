@@ -3,10 +3,20 @@ html, body {
   height: 100%;
   overflow: hidden;
 }
-canvas {
-  display: block;
-  background: #ffffff; /* white canvas */
-  cursor: crosshair;
-  width: 100%;
+
+#chartContainer {
+  display: flex;
   height: 100%;
+  width: 100%;
+}
+
+#mainCanvas {
+  flex: 1;           /* takes remaining space */
+  background: #ffffff;
+  cursor: crosshair;
+}
+
+#priceCanvas {
+  width: 60px;        /* fixed panel width */
+  background: #f0f0f0;
 }

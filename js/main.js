@@ -1,3 +1,3 @@
 import ChartCanvas from './ChartCanvas.js';
 
-new ChartCanvas('chartCanvas');
+new ChartCanvas('mainCanvas', 'priceCanvas');

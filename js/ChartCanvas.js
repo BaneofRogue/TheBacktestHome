@@ -2,9 +2,12 @@ import Crosshair from './canvas/Crosshair.js';
 import PriceRange from './canvas/PriceRange.js';
 
 export default class ChartCanvas {
-  constructor(canvasId) {
-    this.canvas = document.getElementById(canvasId);
-    this.ctx = this.canvas.getContext('2d');
+  constructor(mainId, priceId) {
+    this.mainCanvas = document.getElementById(mainId);
+    this.priceCanvas = document.getElementById(priceId);
+
+    this.mainCtx = this.mainCanvas.getContext('2d');
+    this.priceCtx = this.priceCanvas.getContext('2d');
 
     this._resizeCanvas();
 
@@ -17,23 +20,26 @@ export default class ChartCanvas {
     // modular components
     this.crosshair = new Crosshair();
     this.priceRange = new PriceRange();
-    this.priceRange.attach(this.canvas, () => this.offsetY);
+    this.priceRange.attach(this.priceCanvas, () => this.offsetY);
 
     this._bindEvents();
     this._drawLoop();
   }
 
   _resizeCanvas() {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
-    this.width = this.canvas.width;
-    this.height = this.canvas.height;
+    this.mainCanvas.width = this.mainCanvas.clientWidth;
+    this.mainCanvas.height = this.mainCanvas.clientHeight;
+    this.mainWidth = this.mainCanvas.width;
+    this.mainHeight = this.mainCanvas.height;
+
+    this.priceCanvas.width = this.priceCanvas.clientWidth;
+    this.priceCanvas.height = this.priceCanvas.clientHeight;
   }
 
   _bindEvents() {
     window.addEventListener('resize', () => this._resizeCanvas());
 
-    this.canvas.addEventListener('mousedown', e => {
+    this.mainCanvas.addEventListener('mousedown', e => {
       if (e.button === 0) {
         this.isDragging = true;
         this.dragStart.x = e.clientX - this.offsetX;
@@ -41,12 +47,14 @@ export default class ChartCanvas {
       }
     });
 
-    this.canvas.addEventListener('mouseup', () => this.isDragging = false);
-    this.canvas.addEventListener('mouseleave', () => this.isDragging = false);
+    this.mainCanvas.addEventListener('mouseup', () => this.isDragging = false);
+    this.mainCanvas.addEventListener('mouseleave', () => this.isDragging = false);
 
-    this.canvas.addEventListener('mousemove', e => {
-      this.mousePos.x = e.offsetX;
-      this.mousePos.y = e.offsetY;
+    this.mainCanvas.addEventListener('mousemove', e => {
+      const rect = this.mainCanvas.getBoundingClientRect();
+      this.mousePos.x = e.clientX - rect.left;
+      this.mousePos.y = e.clientY - rect.top;
+
       if (this.isDragging) {
         this.offsetX = e.clientX - this.dragStart.x;
         this.offsetY = e.clientY - this.dragStart.y;
@@ -55,8 +63,8 @@ export default class ChartCanvas {
   }
 
   _drawLoop() {
-    const ctx = this.ctx;
-    ctx.clearRect(0, 0, this.width, this.height);
+    const ctx = this.mainCtx;
+    ctx.clearRect(0, 0, this.mainWidth, this.mainHeight);
 
     ctx.save();
     ctx.translate(this.offsetX, this.offsetY);
@@ -67,8 +75,10 @@ export default class ChartCanvas {
 
     ctx.restore();
 
-    // draw components
-    this.crosshair.draw(ctx, this.mousePos, this.width, this.height);
+    // draw crosshair on main canvas
+    this.crosshair.draw(ctx, this.mousePos, this.mainWidth, this.mainHeight);
+
+    // draw price panel (separate canvas)
     this.priceRange.draw();
 
     requestAnimationFrame(() => this._drawLoop());
