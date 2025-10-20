@@ -26,16 +26,18 @@ export default class ChartCanvas {
     this._drawLoop();
   }
 
-  _resizeCanvas() {
+    _resizeCanvas() {
     // main canvas
-    this.mainCanvas.width = this.mainCanvas.clientWidth;
-    this.mainCanvas.height = this.mainCanvas.clientHeight;
+    const mainRect = this.mainCanvas.getBoundingClientRect();
+    this.mainCanvas.width = mainRect.width;
+    this.mainCanvas.height = mainRect.height;
     this.mainWidth = this.mainCanvas.width;
     this.mainHeight = this.mainCanvas.height;
 
     // price canvas
-    this.priceCanvas.width = this.priceCanvas.clientWidth;
-    this.priceCanvas.height = this.priceCanvas.clientHeight;
+    const priceRect = this.priceCanvas.getBoundingClientRect();
+    this.priceCanvas.width = priceRect.width;
+    this.priceCanvas.height = priceRect.height;
     }
 
 
