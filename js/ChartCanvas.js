@@ -67,8 +67,8 @@ export default class ChartCanvas {
       if (this.isDragging) {
         this.offsetX = e.clientX - this.dragStart.x;
         this.offsetY = e.clientY - this.dragStart.y;
-        this.needsRedraw = true;
       }
+      this.needsRedraw = true;
     });
   }
 
