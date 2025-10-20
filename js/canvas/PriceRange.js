@@ -62,23 +62,29 @@ export default class PriceRange {
 
     const deltaY = e.clientY - this.dragStartY; // positive when dragging down
 
-    // reverse direction (drag down -> zoom out)
-    const k = 0.0005; // sensitivity
-    const zoomFactor = Math.exp(-deltaY * k); // minus sign flips direction
+    // exponential mapping -> stable multiplicative zoom
+    // k controls sensitivity. Lower k = slower zoom.
+    const k = 0.001; // tune this (0.0005..0.002 typical). smaller = less sensitive
+    const zoomFactor = Math.exp(deltaY * k); // >1 when dragging down, <1 when dragging up
 
-    // clamp scale
+    // clamp resulting pxPerPrice to sane bounds
     const newPxPerPrice = Math.max(0.05, Math.min(1000, this.pxPerPriceStart * zoomFactor));
 
-    // keep center fixed
+    // price at the vertical center when drag started (fixed anchor)
     const centerY = this.canvas.height / 2;
     const centerPriceAtStart = this.topPriceStart - centerY / this.pxPerPriceStart;
 
+    // compute new topPrice so centerPrice stays at centerY after scale change
     this.pxPerPrice = newPxPerPrice;
     this.topPrice = centerPriceAtStart + centerY / this.pxPerPrice;
 
+    if (this.topPrice - this.canvas.height / this.pxPerPrice < this.bottomLimit) {
+      // enforce bottom limit so we don't show prices below min
+      this.topPrice = this.bottomLimit + this.canvas.height / this.pxPerPrice;
+    }
+
     if (this.chart) this.chart.needsRedraw = true;
   }
-
 
   _endDrag() {
     this.dragging = false;
