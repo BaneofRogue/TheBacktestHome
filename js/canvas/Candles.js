@@ -25,10 +25,11 @@ export default class Candles {
       const x = i * totalCandleWidth + offsetX;
 
       // convert price → Y using dynamic topPrice & pxPerPrice
-      const openY  = (priceRange.topPrice - candle.open) * priceRange.pxPerPrice + offsetY;
-      const closeY = (priceRange.topPrice - candle.close) * priceRange.pxPerPrice + offsetY;
-      const highY  = (priceRange.topPrice - candle.high) * priceRange.pxPerPrice + offsetY;
-      const lowY   = (priceRange.topPrice - candle.low) * priceRange.pxPerPrice + offsetY;
+      const openY  = (priceRange.topPrice - candle.open) * priceRange.pxPerPrice;
+      const closeY = (priceRange.topPrice - candle.close) * priceRange.pxPerPrice;
+      const highY  = (priceRange.topPrice - candle.high) * priceRange.pxPerPrice;
+      const lowY   = (priceRange.topPrice - candle.low) * priceRange.pxPerPrice;
+
 
       const color = candle.close >= candle.open ? this.upColor : this.downColor;
 
