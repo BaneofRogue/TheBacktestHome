@@ -95,6 +95,7 @@ export default class ChartCanvas {
         const ctx = this.mainCtx;
         ctx.clearRect(0, 0, this.mainWidth, this.mainHeight);
 
+        this.priceRange.updateFromCandles(this.candles);
         // draw only visible candles
         this.candles.draw(
           ctx,
