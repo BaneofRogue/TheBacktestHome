@@ -59,17 +59,19 @@ export default class PriceRange {
 
     const deltaY = e.clientY - this.dragStartY;
 
-    // Drag down -> shrink (zoom in)
-    // Drag up -> expand (zoom out)
-    const zoomChange = 1 + deltaY * 0.005;
-    this.pxPerPrice = Math.max(0.1, this.pxPerPriceStart * zoomChange);
+    // Smaller sensitivity
+    let zoomFactor = 1 + deltaY * 0.001; // less aggressive
+    zoomFactor = Math.max(0.5, Math.min(2.0, zoomFactor)); // clamp zoom factor
 
-    // keep topPrice centered so it scales from center
+    this.pxPerPrice = Math.max(0.1, this.pxPerPriceStart * zoomFactor);
+
+    // Keep scaling around the center
     const centerPrice = this.topPrice - (this.canvas.height / 2) / this.pxPerPriceStart;
     this.topPrice = centerPrice + (this.canvas.height / 2) / this.pxPerPrice;
 
     if (this.chart) this.chart.needsRedraw = true;
   }
+
 
   _endDrag() {
     this.dragging = false;
