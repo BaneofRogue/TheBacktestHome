@@ -1,5 +1,6 @@
 import Crosshair from './canvas/Crosshair.js';
 import PriceRange from './canvas/PriceRange.js';
+import Candles from './canvas/Candles.js';
 
 export default class ChartCanvas {
   constructor(mainId, priceId) {
@@ -22,7 +23,7 @@ export default class ChartCanvas {
     this.priceRange = new PriceRange();
     this.priceRange.attach(this.priceCanvas, () => this.offsetY);
     this.candles = new Candles();
-    
+
     this._bindEvents();
     this._drawLoop();
   }
