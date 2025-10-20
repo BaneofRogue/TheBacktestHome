@@ -1,37 +1,55 @@
+// InteractionManager.js
 export class InteractionManager {
   constructor(chartRenderer, canvas) {
     this.chartRenderer = chartRenderer;
     this.canvas = canvas;
+
     this.dragging = false;
     this.lastX = 0;
 
-    canvas.addEventListener('wheel', e => this.onWheel(e));
+    // Event bindings
+    canvas.addEventListener('wheel', e => this.onWheel(e), { passive: false });
     canvas.addEventListener('mousedown', e => this.startDrag(e));
     canvas.addEventListener('mousemove', e => this.onDrag(e));
     canvas.addEventListener('mouseup', () => this.stopDrag());
+    canvas.addEventListener('mouseleave', () => this.stopDrag());
+
+    // Handle resize
+    window.addEventListener('resize', () => this.onResize());
   }
 
   onWheel(e) {
     e.preventDefault();
-    const delta = Math.sign(e.deltaY);
-    this.chartRenderer.scaleX *= delta > 0 ? 0.9 : 1.1;
-    this.chartRenderer.render();
+    const factor = e.deltaY > 0 ? 0.9 : 1.1;
+    const rect = this.canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left; // relative to canvas
+    this.chartRenderer.zoomAt(factor, mouseX);
   }
 
   startDrag(e) {
     this.dragging = true;
     this.lastX = e.clientX;
+    this.canvas.style.cursor = 'grabbing';
   }
 
   onDrag(e) {
     if (!this.dragging) return;
     const dx = e.clientX - this.lastX;
-    this.chartRenderer.offsetX += dx;
     this.lastX = e.clientX;
-    this.chartRenderer.render();
+    this.chartRenderer.setOffsetX(this.chartRenderer.offsetX + dx);
   }
 
   stopDrag() {
-    this.dragging = false;
+    if (this.dragging) {
+      this.dragging = false;
+      this.canvas.style.cursor = 'default';
+    }
+  }
+
+  onResize() {
+    const parent = this.canvas.parentElement;
+    this.canvas.width = parent.clientWidth;
+    this.canvas.height = parent.clientHeight;
+    this.chartRenderer.render();
   }
 }
