@@ -40,8 +40,6 @@ export default class ChartCanvas {
     this.priceCanvas.height = priceWrapper.clientHeight;
   }
 
-
-
   _bindEvents() {
     window.addEventListener('resize', () => this._resizeCanvas());
 
@@ -68,23 +66,36 @@ export default class ChartCanvas {
     });
   }
 
+  loadCandles(data) {
+    this.candles.setData(data);
+
+    // determine price range dynamically
+    const prices = data.flatMap(c => [c.high, c.low]);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    this.priceRange.min = minPrice;
+    this.priceRange.max = maxPrice;
+  }
+
   _drawLoop() {
     const ctx = this.mainCtx;
     ctx.clearRect(0, 0, this.mainWidth, this.mainHeight);
 
-    ctx.save();
-    ctx.translate(this.offsetX, this.offsetY);
+    // draw candles
+    this.candles.draw(
+      ctx,
+      this.offsetX,
+      this.offsetY,
+      this.mainWidth,
+      this.mainHeight,
+      this.priceRange.min,
+      this.priceRange.max
+    );
 
-    // placeholder chart/drawing
-    ctx.fillStyle = '#ddd';
-    ctx.fillRect(50, 50, 100, 100);
-
-    ctx.restore();
-
-    // draw crosshair on main canvas
+    // draw crosshair
     this.crosshair.draw(ctx, this.mousePos, this.mainWidth, this.mainHeight);
 
-    // draw price panel (separate canvas)
+    // draw price panel
     this.priceRange.draw();
 
     requestAnimationFrame(() => this._drawLoop());
