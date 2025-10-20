@@ -21,7 +21,8 @@ export default class ChartCanvas {
     this.crosshair = new Crosshair();
     this.priceRange = new PriceRange();
     this.priceRange.attach(this.priceCanvas, () => this.offsetY);
-
+    this.candles = new Candles();
+    
     this._bindEvents();
     this._drawLoop();
   }
