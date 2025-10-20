@@ -14,6 +14,13 @@ export default class Candles {
   draw(ctx, offsetX, offsetY, canvasWidth, canvasHeight, priceRange) {
     if (!this.data || this.data.length === 0) return;
 
+    ctx.fillStyle = 'black';
+    ctx.font = '12px monospace';
+    ctx.fillText(
+      `top:${priceRange.topPrice.toFixed(2)}  px/price:${priceRange.pxPerPrice.toFixed(4)}  data:${this.data.length}`,
+      10, 15
+    );
+
     const totalCandleWidth = this.candleWidth + this.candleSpacing;
 
     // calculate first/last visible index

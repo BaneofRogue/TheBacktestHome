@@ -93,7 +93,15 @@ export default class ChartCanvas {
         const ctx = this.mainCtx;
         ctx.clearRect(0, 0, this.mainWidth, this.mainHeight);
 
-        this.candles.draw(ctx, this.offsetX, this.offsetY, this.mainWidth, this.mainHeight, this.priceRange.topPrice, this.priceRange.pxPerPrice);
+        this.candles.draw(
+            ctx,
+            this.offsetX,
+            this.offsetY,
+            this.mainWidth,
+            this.mainHeight,
+            this.priceRange // pass entire object
+            );
+
 
         // draw price panel
         this.priceRange.draw();
