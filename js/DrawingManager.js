@@ -15,6 +15,7 @@ export class DrawingManager {
   }
 
   startDraw(e) {
+    if (e.button !== 0) return; // left click only
     const { offsetX, offsetY } = e;
     this.isDrawing = true;
     this.active = { type: 'line', start: { x: offsetX, y: offsetY }, end: { x: offsetX, y: offsetY } };
@@ -47,14 +48,12 @@ export class DrawingManager {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // existing drawings
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.lineWidth = 1;
     for (const d of this.drawings) {
       this.drawLine(d.start, d.end);
     }
 
-    // active (in-progress) drawing
     if (this.active) {
       ctx.strokeStyle = 'rgba(0, 0, 255, 0.6)';
       this.drawLine(this.active.start, this.active.end);

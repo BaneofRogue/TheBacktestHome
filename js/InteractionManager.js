@@ -7,14 +7,11 @@ export class InteractionManager {
     this.dragging = false;
     this.lastX = 0;
 
-    // Event bindings
     canvas.addEventListener('wheel', e => this.onWheel(e), { passive: false });
     canvas.addEventListener('mousedown', e => this.startDrag(e));
     canvas.addEventListener('mousemove', e => this.onDrag(e));
     canvas.addEventListener('mouseup', () => this.stopDrag());
     canvas.addEventListener('mouseleave', () => this.stopDrag());
-
-    // Handle resize
     window.addEventListener('resize', () => this.onResize());
   }
 
@@ -22,11 +19,15 @@ export class InteractionManager {
     e.preventDefault();
     const factor = e.deltaY > 0 ? 0.9 : 1.1;
     const rect = this.canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left; // relative to canvas
+    const mouseX = e.clientX - rect.left;
     this.chartRenderer.zoomAt(factor, mouseX);
   }
 
   startDrag(e) {
+    // Only middle or right click (1 = middle, 2 = right)
+    if (e.button !== 1 && e.button !== 2) return;
+    e.preventDefault();
+
     this.dragging = true;
     this.lastX = e.clientX;
     this.canvas.style.cursor = 'grabbing';
