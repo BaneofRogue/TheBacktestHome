@@ -28,17 +28,18 @@ export default class ChartCanvas {
 
   _resizeCanvas() {
     // main canvas
-    const mainRect = this.mainCanvas.getBoundingClientRect();
-    this.mainCanvas.width = mainRect.width;
-    this.mainCanvas.height = mainRect.height;
+    const mainWrapper = this.mainCanvas.parentElement;
+    this.mainCanvas.width = mainWrapper.clientWidth;
+    this.mainCanvas.height = mainWrapper.clientHeight;
     this.mainWidth = this.mainCanvas.width;
     this.mainHeight = this.mainCanvas.height;
 
     // price canvas
-    const priceRect = this.priceCanvas.getBoundingClientRect();
-    this.priceCanvas.width = priceRect.width;
-    this.priceCanvas.height = priceRect.height;
+    const priceWrapper = this.priceCanvas.parentElement;
+    this.priceCanvas.width = priceWrapper.clientWidth;
+    this.priceCanvas.height = priceWrapper.clientHeight;
   }
+
 
 
   _bindEvents() {

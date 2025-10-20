@@ -12,18 +12,32 @@ html, body {
   height: 100%;
 }
 
+/* main chart area */
+#mainCanvasWrapper {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0;
+  position: relative;
+}
+
 #mainCanvas {
-  flex-grow: 1;        /* fills remaining space */
-  flex-shrink: 1;      /* can shrink */
-  flex-basis: 0;       /* important: flex fills correctly */
+  width: 100%;
+  height: 100%;
+  display: block;
   background: #ffffff;
   cursor: crosshair;
-  display: block;
+}
+
+/* price panel */
+#priceCanvasWrapper {
+  width: 60px;       /* fixed width panel */
+  flex-shrink: 0;
+  position: relative;
 }
 
 #priceCanvas {
-  width: 60px;          /* fixed width for price panel */
-  flex-shrink: 0;       /* never shrink */
-  background: #f0f0f0;
+  width: 100%;
+  height: 100%;
   display: block;
+  background: #f0f0f0;
 }
