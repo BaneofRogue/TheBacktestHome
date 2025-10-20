@@ -4,19 +4,20 @@ export default class PriceRange {
     this.ctx = canvas.getContext('2d');
     this.chart = chart;
 
-    // Default scale
+    // Y-axis scale
     this.pxPerPrice = 10;
     this.topPrice = 100;
     this.bottomLimit = -100;
     this.tickPx = 50;
     this.zoomFactor = 1.2;
 
-    // Interaction
+    // Drag zoom
     this.dragging = false;
     this.dragStartY = 0;
-    this.topPriceStart = 0;
+    this.pxPerPriceStart = 0;
 
     // Bind events
+    this.canvas.style.cursor = 'ns-resize';
     this.canvas.addEventListener('wheel', e => this._onWheel(e));
     this.canvas.addEventListener('mousedown', e => this._startDrag(e));
     this.canvas.addEventListener('mousemove', e => this._onDrag(e));
@@ -24,7 +25,6 @@ export default class PriceRange {
     this.canvas.addEventListener('mouseleave', () => this._endDrag());
   }
 
-  /** Dynamically set range from candle data */
   setRange(min, max) {
     this.topPrice = max;
     this.pxPerPrice = this.canvas.height / (max - Math.max(min, this.bottomLimit));
@@ -47,20 +47,33 @@ export default class PriceRange {
     if (e.button !== 0) return;
     this.dragging = true;
     this.dragStartY = e.clientY;
-    this.topPriceStart = this.topPrice;
+    this.pxPerPriceStart = this.pxPerPrice;
+    this.canvas.style.cursor = 'grabbing';
   }
 
   _onDrag(e) {
-    if (!this.dragging) return;
-    const delta = e.clientY - this.dragStartY;
-    this.topPrice = this.topPriceStart - delta / this.pxPerPrice;
-    if (this.topPrice - this.canvas.height / this.pxPerPrice < this.bottomLimit)
-      this.topPrice = this.bottomLimit + this.canvas.height / this.pxPerPrice;
+    if (!this.dragging) {
+      this.canvas.style.cursor = 'ns-resize';
+      return;
+    }
+
+    const deltaY = e.clientY - this.dragStartY;
+
+    // Drag down -> shrink (zoom in)
+    // Drag up -> expand (zoom out)
+    const zoomChange = 1 + deltaY * 0.005;
+    this.pxPerPrice = Math.max(0.1, this.pxPerPriceStart * zoomChange);
+
+    // keep topPrice centered so it scales from center
+    const centerPrice = this.topPrice - (this.canvas.height / 2) / this.pxPerPriceStart;
+    this.topPrice = centerPrice + (this.canvas.height / 2) / this.pxPerPrice;
+
     if (this.chart) this.chart.needsRedraw = true;
   }
 
   _endDrag() {
     this.dragging = false;
+    this.canvas.style.cursor = 'ns-resize';
   }
 
   resetScale() {

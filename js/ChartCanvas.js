@@ -83,7 +83,6 @@ export default class ChartCanvas {
 
   }
 
-
   _drawLoop() {
     if (this.needsRedraw) {
         const ctx = this.mainCtx;
