@@ -1,12 +1,11 @@
+import Crosshair from './canvas/Crosshair.js';
+
 export default class ChartCanvas {
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext('2d');
 
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
-    this.canvas.width = this.width;
-    this.canvas.height = this.height;
+    this._resizeCanvas();
 
     this.offsetX = 0;
     this.offsetY = 0;
@@ -14,17 +13,22 @@ export default class ChartCanvas {
     this.dragStart = { x: 0, y: 0 };
     this.mousePos = { x: 0, y: 0 };
 
+    // modular components
+    this.crosshair = new Crosshair();
+
     this._bindEvents();
     this._drawLoop();
   }
 
+  _resizeCanvas() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    this.width = this.canvas.width;
+    this.height = this.canvas.height;
+  }
+
   _bindEvents() {
-    window.addEventListener('resize', () => {
-      this.width = window.innerWidth;
-      this.height = window.innerHeight;
-      this.canvas.width = this.width;
-      this.canvas.height = this.height;
-    });
+    window.addEventListener('resize', () => this._resizeCanvas());
 
     this.canvas.addEventListener('mousedown', e => {
       if (e.button === 0) {
@@ -47,36 +51,22 @@ export default class ChartCanvas {
     });
   }
 
-  _drawCrosshair() {
-    const ctx = this.ctx;
-    ctx.save();
-    ctx.strokeStyle = '#888';
-    ctx.setLineDash([5, 5]);
-    // vertical
-    ctx.beginPath();
-    ctx.moveTo(this.mousePos.x, 0);
-    ctx.lineTo(this.mousePos.x, this.height);
-    ctx.stroke();
-    // horizontal
-    ctx.beginPath();
-    ctx.moveTo(0, this.mousePos.y);
-    ctx.lineTo(this.width, this.mousePos.y);
-    ctx.stroke();
-    ctx.restore();
-  }
-
   _drawLoop() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
 
     ctx.save();
     ctx.translate(this.offsetX, this.offsetY);
-    // placeholder for future chart/drawing
-    ctx.fillStyle = '#444';
+
+    // placeholder for future chart/drawing logic
+    ctx.fillStyle = '#ddd';
     ctx.fillRect(50, 50, 100, 100);
+
     ctx.restore();
 
-    this._drawCrosshair();
+    // draw modular components
+    this.crosshair.draw(ctx, this.mousePos, this.width, this.height);
+
     requestAnimationFrame(() => this._drawLoop());
   }
 }

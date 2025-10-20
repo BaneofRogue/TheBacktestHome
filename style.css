@@ -1,2 +1,12 @@
-body { margin: 0; }
-canvas { display: block; background: #1e1e1e; cursor: crosshair; }
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+canvas {
+  display: block;
+  background: #ffffff; /* white canvas */
+  cursor: crosshair;
+  width: 100%;
+  height: 100%;
+}
