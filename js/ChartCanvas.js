@@ -22,9 +22,7 @@ export default class ChartCanvas {
 
     // modular components
     this.crosshair = new Crosshair();
-    this.priceRange = new PriceRange();
-    this.priceRange.chart = this;
-    this.priceRange.attach(this.priceCanvas, () => this.offsetY);
+    this.priceRange = new PriceRange(this.priceCanvas, this);
     this.candles = new Candles();
 
     this._bindEvents();
@@ -95,17 +93,10 @@ export default class ChartCanvas {
         const ctx = this.mainCtx;
         ctx.clearRect(0, 0, this.mainWidth, this.mainHeight);
 
-        this.priceRange.updateFromCandles(this.candles);
-        // draw only visible candles
-        this.candles.draw(
-          ctx,
-          this.offsetX,
-          this.offsetY,
-          this.mainWidth,
-          this.mainHeight,
-          this.priceRange.min,
-          this.priceRange.max
-        );
+        this.candles.draw(ctx, this.offsetX, this.offsetY, this.mainWidth, this.mainHeight, this.priceRange.topPrice, this.priceRange.pxPerPrice);
+
+        // draw price panel
+        this.priceRange.draw();
 
         // draw crosshair
         this.crosshair.draw(ctx, this.mousePos, this.mainWidth, this.mainHeight);

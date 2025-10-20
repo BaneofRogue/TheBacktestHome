@@ -1,103 +1,117 @@
 export default class PriceRange {
-  constructor(min = 0, max = 100, width = 60, tickCount = 10) {
-    this.min = min;
-    this.max = max;
-    this.width = width;
-    this.tickCount = tickCount;
-    this.zoomFactor = 1.2;
-    this.chart = null;
-  }
-
-  attach(canvas, getOffsetY) {
+  constructor(canvas, chart = null) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.getOffsetY = getOffsetY;
+    this.chart = chart;
 
-    canvas.addEventListener('wheel', e => this._onWheel(e));
+    // Y-axis scale
+    this.pxPerPrice = 10; // pixels per 1 unit of price
+    this.topPrice = 100;  // top of the chart price
+    this.tickPx = 50;     // pixel spacing between ticks
+
+    // Zoom
+    this.zoomFactor = 1.2;
+
+    // Bind events
+    this.canvas.addEventListener('wheel', e => this._onWheel(e));
+    this.canvas.addEventListener('mousedown', e => this._startDrag(e));
+    this.canvas.addEventListener('mousemove', e => this._onDrag(e));
+    this.canvas.addEventListener('mouseup', e => this._endDrag(e));
+    this.canvas.addEventListener('mouseleave', e => this._endDrag(e));
+    this.dragging = false;
+    this.dragStartY = 0;
+    this.topPriceStart = 0;
   }
 
   _onWheel(e) {
-    const rect = this.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    if (x < this.canvas.width - this.width) return;
-
     e.preventDefault();
-    const mouseY = e.clientY - rect.top;
-    const range = this.max - this.min;
-    const zoomCenter = this.max - (mouseY / this.canvas.height) * range;
+    const mouseY = e.offsetY;
 
-    if (e.deltaY < 0) { // zoom in
-        const newRange = range / this.zoomFactor;
-        this.min = zoomCenter - (zoomCenter - this.min) / this.zoomFactor;
-        this.max = this.min + newRange;
-    } else { // zoom out
-        const newRange = range * this.zoomFactor;
-        this.min = zoomCenter - (zoomCenter - this.min) * this.zoomFactor;
-        this.max = this.min + newRange;
+    // zoom relative to mouse
+    const priceAtMouse = this.topPrice - mouseY / this.pxPerPrice;
+    if (e.deltaY < 0) {
+      this.pxPerPrice *= this.zoomFactor; // zoom in
+    } else {
+      this.pxPerPrice /= this.zoomFactor; // zoom out
     }
+    // maintain the price under mouse position
+    this.topPrice = priceAtMouse + mouseY / this.pxPerPrice;
 
-    // mark chart for redraw
     if (this.chart) this.chart.needsRedraw = true;
   }
 
-  updateFromCandles(candles, offsetX = 0, canvasWidth = 0) {
-    if (!candles || !candles.data || candles.data.length === 0) return;
+  _startDrag(e) {
+    if (e.button !== 0) return;
+    this.dragging = true;
+    this.dragStartY = e.clientY;
+    this.topPriceStart = this.topPrice;
+  }
 
-    const totalCandleWidth = candles.candleWidth + candles.candleSpacing;
+  _onDrag(e) {
+    if (!this.dragging) return;
+    const delta = e.clientY - this.dragStartY;
+    this.topPrice = this.topPriceStart - delta / this.pxPerPrice;
+    if (this.chart) this.chart.needsRedraw = true;
+  }
 
-    // calculate visible indices
-    const firstIndex = Math.max(0, Math.floor(-offsetX / totalCandleWidth));
-    const lastIndex = Math.min(candles.data.length - 1, Math.ceil((canvasWidth - offsetX) / totalCandleWidth));
+  _endDrag(e) {
+    this.dragging = false;
+  }
 
-    let minPrice = Infinity;
-    let maxPrice = -Infinity;
-
-    for (let i = firstIndex; i <= lastIndex; i++) {
-        const c = candles.data[i];
-        if (!c) continue;
-        if (c.low < minPrice) minPrice = c.low;
-        if (c.high > maxPrice) maxPrice = c.high;
-    }
-
-    this.min = Math.max(minPrice, -100);
-    this.max = maxPrice;
-
+  resetScale() {
+    this.pxPerPrice = 10;
+    this.topPrice = 100;
     if (this.chart) this.chart.needsRedraw = true;
   }
 
   draw() {
-    if (!this.ctx) return;
-
     const ctx = this.ctx;
-    const offsetY = this.getOffsetY();
-    const width = this.width;
+    const width = this.canvas.width;
     const height = this.canvas.height;
 
     ctx.save();
+    ctx.clearRect(0, 0, width, height);
+
     ctx.fillStyle = '#f0f0f0';
-    ctx.fillRect(this.canvas.width - width, 0, width, height);
+    ctx.fillRect(0, 0, width, height);
 
-    const range = this.max - this.min;
-    for (let i = 0; i <= this.tickCount; i++) {
-      const y = (i / this.tickCount) * height + offsetY;
-      const price = this.max - (i / this.tickCount) * range;
+    ctx.strokeStyle = '#888';
+    ctx.fillStyle = '#000';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.setLineDash([2, 2]);
 
-      if (y >= 0 && y <= height) {
-        ctx.strokeStyle = '#888';
-        ctx.setLineDash([2, 2]);
-        ctx.beginPath();
-        ctx.moveTo(this.canvas.width - width, y);
-        ctx.lineTo(this.canvas.width, y);
-        ctx.stroke();
+    // dynamic tick interval in price units
+    const tickPrice = this._getTickStep();
+    const startPrice = Math.floor(this.topPrice / tickPrice) * tickPrice;
 
-        ctx.fillStyle = '#000';
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(price.toFixed(2), this.canvas.width - 5, y);
-      }
+    for (let price = startPrice; price > this.topPrice - height / this.pxPerPrice; price -= tickPrice) {
+      const y = (this.topPrice - price) * this.pxPerPrice;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+      ctx.fillText(price.toFixed(2), width - 5, y);
     }
 
     ctx.restore();
+  }
+
+  _getTickStep() {
+    // Adjust tick step depending on zoom
+    const approxTicks = this.canvas.height / this.tickPx;
+    const priceRange = this.canvas.height / this.pxPerPrice;
+    const roughStep = priceRange / approxTicks;
+
+    // Round to nice numbers: 0.5, 1, 2, 5, 10, 50, 100, etc
+    const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+    const residual = roughStep / magnitude;
+    let nice;
+    if (residual < 1.5) nice = 1;
+    else if (residual < 3) nice = 2;
+    else if (residual < 7) nice = 5;
+    else nice = 10;
+    return nice * magnitude;
   }
 }
