@@ -40,13 +40,14 @@ export default class PriceRange {
     if (this.chart) this.chart.needsRedraw = true;
   }
 
-  updateFromCandles(candles, offsetY, height) {
-    if (!candles || candles.length === 0) return;
+  updateFromCandles(candles, offsetX = 0, canvasWidth = 0) {
+    if (!candles || !candles.data || candles.data.length === 0) return;
 
-    // compute min/max of visible candles
     const totalCandleWidth = candles.candleWidth + candles.candleSpacing;
-    const firstIndex = Math.max(0, Math.floor(-candles.offsetX / totalCandleWidth));
-    const lastIndex = Math.min(candles.data.length - 1, Math.ceil((candles.offsetX + this.canvas.width) / totalCandleWidth));
+
+    // calculate visible indices
+    const firstIndex = Math.max(0, Math.floor(-offsetX / totalCandleWidth));
+    const lastIndex = Math.min(candles.data.length - 1, Math.ceil((canvasWidth - offsetX) / totalCandleWidth));
 
     let minPrice = Infinity;
     let maxPrice = -Infinity;
@@ -58,14 +59,11 @@ export default class PriceRange {
         if (c.high > maxPrice) maxPrice = c.high;
     }
 
-    // never go below -100
     this.min = Math.max(minPrice, -100);
     this.max = maxPrice;
 
-    // mark chart for redraw
     if (this.chart) this.chart.needsRedraw = true;
-}
-
+  }
 
   draw() {
     if (!this.ctx) return;
