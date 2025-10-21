@@ -101,22 +101,41 @@ export default class ChartCanvas {
   loadCandles(data, timeframe) {
     const aggregated = aggregateCandles(data, timeframe);
 
-    this.candles.setData(aggregated);
+    // Normalize timestamps relative to the first one
+    const firstTs = aggregated[0].timestamp;
+    const normalized = aggregated.map(c => ({
+      ...c,
+      timestamp: c.timestamp - firstTs
+    }));
 
+    this.candles.setData(normalized);
+
+    // Compute min/max price range
     let min = Infinity, max = -Infinity;
-    for (const c of aggregated) { // compute min/max from aggregated
-        if (c.low < min) min = c.low;
-        if (c.high > max) max = c.high;
+    for (const c of normalized) {
+      if (c.low < min) min = c.low;
+      if (c.high > max) max = c.high;
     }
     this.priceRange.setRange(min, max);
 
-    const start = this.candles.data[0].timestamp;
-    const end = this.candles.data[this.candles.data.length-1].timestamp;
-    this.timeRange.setRange(start, end);
-    this.offsetX = 0; // reset offset
+    // Define visible time range only for what fits horizontally
+    const totalCandles = normalized.length;
+    const visibleCount = Math.floor(this.timeRange.canvas.width / 10); // avg 10px per candle
+    const endIndex = Math.min(totalCandles, visibleCount);
+    const endTime = normalized[endIndex - 1].timestamp;
+    const startTime = 0;
 
+    // Compute pxPerTime so each candle is 1–20 px wide
+    const rangeSeconds = endTime - startTime;
+    const pxPerTime = this.timeRange.canvas.width / rangeSeconds;
+    this.timeRange.pxPerTime = Math.min(20 / 60, Math.max(1 / 60, pxPerTime)); // keep candle width between 1–20px
+    this.timeRange.startTime = startTime;
+    this.timeRange.endTime = endTime;
+
+    this.offsetX = 0;
     this.needsRedraw = true;
-}
+  }
+
 
 
   _drawLoop() {
