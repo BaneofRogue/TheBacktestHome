@@ -54,11 +54,13 @@ export default class ChartCanvas {
     window.addEventListener('resize', () => this._resizeCanvas());
 
     this.mainCanvas.addEventListener('mousedown', e => {
-      if (e.button === 0) {
-        this.isDragging = true;
-        this.dragStart.x = e.clientX - this.offsetX;
-        this.dragStart.y = e.clientY - this.offsetY;
-      }
+        if (e.button === 0) {
+            this.isDragging = true;
+            this.dragStart.x = e.clientX;
+            this.dragStart.y = e.clientY;
+            this.priceRange.topPriceStart = this.priceRange.topPrice; // vertical drag base
+            this.timeRangeLeftStart = this.timeRange.leftTime;        // store initial leftTime
+        }
     });
 
     this.mainCanvas.addEventListener('mousemove', e => {
@@ -67,22 +69,17 @@ export default class ChartCanvas {
         this.mousePos.y = e.clientY - rect.top;
 
         if (this.isDragging) {
-            this.offsetX = e.clientX - this.dragStart.x;
+            // Horizontal drag updates leftTime
+            const deltaPx = e.clientX - this.dragStart.x;
+            const deltaTime = -deltaPx / this.timeRange.pxPerTime;
+            this.timeRange.leftTime = this.timeRangeLeftStart + deltaTime;
 
-            // vertical drag adjusts topPrice proportionally
+            // Vertical drag updates topPrice
             const deltaY = e.clientY - this.dragStart.y;
             const priceDelta = deltaY / this.priceRange.pxPerPrice;
             this.priceRange.topPrice = this.priceRange.topPriceStart + priceDelta;
-        }
-        this.needsRedraw = true;
-    });
 
-    this.mainCanvas.addEventListener('mousedown', e => {
-        if (e.button === 0) {
-            this.isDragging = true;
-            this.dragStart.x = e.clientX - this.offsetX;
-            this.dragStart.y = e.clientY;
-            this.priceRange.topPriceStart = this.priceRange.topPrice; // store initial top
+            this.needsRedraw = true;
         }
     });
 
