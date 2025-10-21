@@ -3,9 +3,17 @@ export default class TimeRange {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.chart = chart;
+    this.candles = chart.candles;
 
-    this.tickPx = 80;   // approx pixel distance between labels
-    this.font = '12px Arial';
+    // X-axis scale
+    this.pxPerTime = 10; // pixels per second
+    this.leftTime = 0;   // timestamp at left edge
+    this.rightLimit = Infinity;
+    this.tickPx = 100;
+    this.zoomFactor = 1.2;
+
+    this.canvas.style.cursor = 'ew-resize';
+    this.canvas.addEventListener('wheel', e => this._onWheel(e));
   }
 
   setRange(min, max) {
@@ -34,50 +42,64 @@ export default class TimeRange {
   }
 
   draw() {
-    if (!this.chart || !this.chart.candles) return;
-
     const ctx = this.ctx;
     const width = this.canvas.width;
     const height = this.canvas.height;
 
     ctx.save();
     ctx.clearRect(0, 0, width, height);
+
     ctx.fillStyle = '#f0f0f0';
     ctx.fillRect(0, 0, width, height);
 
     ctx.strokeStyle = '#888';
     ctx.fillStyle = '#000';
-    ctx.font = this.font;
+    ctx.font = '12px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.setLineDash([2, 2]);
+    ctx.setLineDash([2,2]);
 
-    const candles = this.chart.candles.data;
-    if (!candles || candles.length === 0) {
-      ctx.restore();
-      return;
-    }
+    if (!this.candles || this.candles.data.length === 0) return;
 
-    const totalCandleWidth = this.chart.candles.candleWidth + this.chart.candles.candleSpacing;
+    const offsetX = this.chart ? this.chart.offsetX : 0;
+    const leftTime = this.leftTime - offsetX / this.pxPerTime;
+    const rightTime = leftTime + width / this.pxPerTime;
 
-    // determine first/last visible index based on offsetX
-    const firstIndex = Math.max(0, Math.floor(-this.chart.offsetX / totalCandleWidth));
-    const lastIndex = Math.min(candles.length - 1, Math.ceil((width - this.chart.offsetX) / totalCandleWidth));
+    const tickStep = this._getTickStep(leftTime, rightTime);
 
-    for (let i = firstIndex; i <= lastIndex; i++) {
-      const x = i * totalCandleWidth + this.chart.offsetX + totalCandleWidth / 2;
-      const ts = new Date(candles[i].timestamp * 1000);
-      if ((i - firstIndex) % Math.ceil(this.tickPx / totalCandleWidth) === 0) { // spacing
+    // start drawing from first tick >= leftTime
+    const startTick = Math.ceil(leftTime / tickStep) * tickStep;
+
+    for (let t = startTick; t <= rightTime; t += tickStep) {
+        const x = (t - leftTime) * this.pxPerTime;
+
+        // vertical grid line
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, height);
         ctx.stroke();
 
-        const label = `${ts.getHours()}:${String(ts.getMinutes()).padStart(2, '0')}`;
-        ctx.fillText(label, x, 0);
-      }
+        // timestamp label
+        const date = new Date(t * 1000);
+        const h = String(date.getHours()).padStart(2,'0');
+        const m = String(date.getMinutes()).padStart(2,'0');
+        ctx.fillText(`${h}:${m}`, x, 0);
     }
 
     ctx.restore();
+}
+
+
+  _getTickStep(minTime, maxTime) {
+    const approxTicks = this.canvas.width / this.tickPx;
+    const roughStep = (maxTime - minTime) / approxTicks;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+    const residual = roughStep / magnitude;
+    let nice;
+    if (residual < 1.5) nice = 1;
+    else if (residual < 3) nice = 2;
+    else if (residual < 7) nice = 5;
+    else nice = 10;
+    return nice * magnitude;
   }
 }
