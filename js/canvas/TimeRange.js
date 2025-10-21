@@ -3,12 +3,10 @@ export default class TimeRange {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.chart = chart;
-    this.candles = chart.candles;
+    this.candles = chart?.candles || null;
 
-    // X-axis scale
-    this.pxPerTime = 10; // pixels per second
-    this.leftTime = 0;   // timestamp at left edge
-    this.rightLimit = Infinity;
+    this.pxPerTime = 10;
+    this.leftTime = 0;
     this.tickPx = 100;
     this.zoomFactor = 1.2;
 
@@ -16,29 +14,28 @@ export default class TimeRange {
     this.canvas.addEventListener('wheel', e => this._onWheel(e));
   }
 
-  setRange(min, max) {
-    this.leftTime = min;
-    this.pxPerTime = this.canvas.width / (max - min);
-    if (this.chart) this.chart.needsRedraw = true;
-  }
-
   _onWheel(e) {
     e.preventDefault();
     const mouseX = e.offsetX;
 
     const timeAtMouse = this.leftTime + mouseX / this.pxPerTime;
-    if (e.deltaY < 0) this.pxPerTime *= this.zoomFactor; // zoom in
-    else this.pxPerTime /= this.zoomFactor;              // zoom out
+
+    if (e.deltaY < 0) this.pxPerTime *= this.zoomFactor;
+    else this.pxPerTime /= this.zoomFactor;
 
     this.leftTime = timeAtMouse - mouseX / this.pxPerTime;
-    if (this.chart) this.chart.needsRedraw = true;
+
+    // sync ChartCanvas offsetX
+    if (this.chart) {
+        this.chart.offsetX = (this.leftTime - this.candles.data[0].timestamp) * this.pxPerTime;
+        this.chart.needsRedraw = true;
+    }
   }
 
-  resetScale() {
-    if (!this.candles || this.candles.data.length === 0) return;
-    const first = this.candles.data[0].timestamp;
-    const last = this.candles.data[this.candles.data.length - 1].timestamp;
-    this.setRange(first, last);
+  setRange(min, max) {
+    this.leftTime = min;
+    this.pxPerTime = this.canvas.width / (max - min);
+    if (this.chart) this.chart.needsRedraw = true;
   }
 
   draw() {
