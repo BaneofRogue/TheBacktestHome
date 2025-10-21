@@ -137,12 +137,6 @@ export default class ChartCanvas {
   }
 }
 
-/**
- * Aggregates 1m candles into higher timeframe candles
- * @param {Array} data - array of 1m candles {timestamp, open, high, low, close}
- * @param {number} minutes - timeframe in minutes (5, 15, 60)
- * @returns {Array} aggregated candles
- */
 function aggregateCandles(data, minutes) {
     if (!data || data.length === 0) return [];
 
@@ -151,25 +145,23 @@ function aggregateCandles(data, minutes) {
     const result = [];
 
     let currentCandle = null;
+
     for (const c of data) {
-        // find the aligned timestamp for this timeframe
-        const ts = c.timestamp * 1000; // convert to ms if timestamp is in seconds
+        const ts = c.timestamp * 1000; // seconds → ms
+        // align timestamp to start of interval
         const aligned = Math.floor(ts / interval) * interval;
 
-        if (!currentCandle || currentCandle.timestamp !== aligned) {
-            // push the previous candle
+        if (!currentCandle || currentCandle.timestamp !== aligned / 1000) {
             if (currentCandle) result.push(currentCandle);
 
-            // start a new candle
             currentCandle = {
-                timestamp: aligned / 1000, // convert back to seconds
+                timestamp: aligned / 1000,
                 open: c.open,
                 high: c.high,
                 low: c.low,
                 close: c.close
             };
         } else {
-            // aggregate into current candle
             currentCandle.high = Math.max(currentCandle.high, c.high);
             currentCandle.low = Math.min(currentCandle.low, c.low);
             currentCandle.close = c.close;
