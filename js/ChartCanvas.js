@@ -83,8 +83,9 @@ export default class ChartCanvas {
     this.mainCanvas.addEventListener('mouseleave', () => this.isDragging = false);
   }
 
-  loadCandles(data) {
-    this.candles.setData(data);
+  loadCandles(data, timeframe) {
+    const aggregated = aggregateCandles(data, timeframe);
+    this.candles.setData(aggregated);
 
     let min = Infinity, max = -Infinity;
     for (const c of data) {
@@ -93,7 +94,6 @@ export default class ChartCanvas {
     }
     this.priceRange.setRange(min, max);
     this.needsRedraw = true;
-
   }
 
   _drawLoop() {
@@ -126,4 +126,47 @@ export default class ChartCanvas {
 
     requestAnimationFrame(() => this._drawLoop());
   }
+}
+
+/**
+ * Aggregates 1m candles into higher timeframe candles
+ * @param {Array} data - array of 1m candles {timestamp, open, high, low, close}
+ * @param {number} minutes - timeframe in minutes (5, 15, 60)
+ * @returns {Array} aggregated candles
+ */
+function aggregateCandles(data, minutes) {
+    if (!data || data.length === 0) return [];
+
+    const msPerMinute = 60 * 1000;
+    const interval = minutes * msPerMinute;
+    const result = [];
+
+    let currentCandle = null;
+    for (const c of data) {
+        // find the aligned timestamp for this timeframe
+        const ts = c.timestamp * 1000; // convert to ms if timestamp is in seconds
+        const aligned = Math.floor(ts / interval) * interval;
+
+        if (!currentCandle || currentCandle.timestamp !== aligned) {
+            // push the previous candle
+            if (currentCandle) result.push(currentCandle);
+
+            // start a new candle
+            currentCandle = {
+                timestamp: aligned / 1000, // convert back to seconds
+                open: c.open,
+                high: c.high,
+                low: c.low,
+                close: c.close
+            };
+        } else {
+            // aggregate into current candle
+            currentCandle.high = Math.max(currentCandle.high, c.high);
+            currentCandle.low = Math.min(currentCandle.low, c.low);
+            currentCandle.close = c.close;
+        }
+    }
+
+    if (currentCandle) result.push(currentCandle);
+    return result;
 }
