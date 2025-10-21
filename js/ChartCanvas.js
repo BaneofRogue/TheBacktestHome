@@ -47,7 +47,7 @@ export default class ChartCanvas {
 
     const timeWrapper = this.timeCanvas.parentElement;
     this.timeCanvas.width = timeWrapper.clientWidth;
-    this.timeCanvas.height = 60;
+    this.timeCanvas.height = timeWrapper.clientHeight;
   }
 
   _bindEvents() {
