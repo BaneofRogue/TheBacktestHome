@@ -54,7 +54,7 @@ export default class Candles {
     if (hoveredCandle) {
         ctx.save();
         ctx.fillStyle = 'black';
-        ctx.font = '12px monospace';
+        ctx.font = '14px monospace';
         ctx.textAlign = 'left';
         ctx.fillText(
             `O: ${hoveredCandle.open}  H: ${hoveredCandle.high}  L: ${hoveredCandle.low}  C: ${hoveredCandle.close}`,
