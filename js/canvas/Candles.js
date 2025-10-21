@@ -23,16 +23,15 @@ export default class Candles {
       let x;
       let candleWidth;
       if (timeRange) {
-        const t0 = this.data[0].timestamp;
-        const t = candle.timestamp;
-        x = (t - t0) * timeRange.pxPerTime + offsetX;
-        // dynamically scale candle width proportional to pxPerTime
-        candleWidth = timeRange.pxPerTime * 60 * 0.9; // 60 seconds per 1m candle, adjust 0.9 for spacing
+        // Ignore gaps: position candles evenly by index. Fixes weekend gaps.
+        x = i * (timeRange.pxPerTime * 60 * 0.9) + offsetX;
+        candleWidth = timeRange.pxPerTime * 60 * 0.9;
       } else {
         const totalCandleWidth = this.defaultCandleWidth + this.candleSpacing;
         x = i * totalCandleWidth + offsetX;
         candleWidth = this.defaultCandleWidth;
       }
+
 
       const openY = (priceRange.topPrice - candle.open) * priceRange.pxPerPrice;
       const closeY = (priceRange.topPrice - candle.close) * priceRange.pxPerPrice;
