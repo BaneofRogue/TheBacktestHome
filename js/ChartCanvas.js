@@ -54,20 +54,33 @@ export default class ChartCanvas {
       }
     });
 
+    this.mainCanvas.addEventListener('mousemove', e => {
+        const rect = this.mainCanvas.getBoundingClientRect();
+        this.mousePos.x = e.clientX - rect.left;
+        this.mousePos.y = e.clientY - rect.top;
+
+        if (this.isDragging) {
+            this.offsetX = e.clientX - this.dragStart.x;
+
+            // vertical drag adjusts topPrice proportionally
+            const deltaY = e.clientY - this.dragStart.y;
+            const priceDelta = deltaY / this.priceRange.pxPerPrice;
+            this.priceRange.topPrice = this.priceRange.topPriceStart + priceDelta;
+        }
+        this.needsRedraw = true;
+    });
+
+    this.mainCanvas.addEventListener('mousedown', e => {
+        if (e.button === 0) {
+            this.isDragging = true;
+            this.dragStart.x = e.clientX - this.offsetX;
+            this.dragStart.y = e.clientY;
+            this.priceRange.topPriceStart = this.priceRange.topPrice; // store initial top
+        }
+    });
+
     this.mainCanvas.addEventListener('mouseup', () => this.isDragging = false);
     this.mainCanvas.addEventListener('mouseleave', () => this.isDragging = false);
-
-    this.mainCanvas.addEventListener('mousemove', e => {
-      const rect = this.mainCanvas.getBoundingClientRect();
-      this.mousePos.x = e.clientX - rect.left;
-      this.mousePos.y = e.clientY - rect.top;
-
-      if (this.isDragging) {
-        this.offsetX = e.clientX - this.dragStart.x;
-        this.offsetY = e.clientY - this.dragStart.y;
-      }
-      this.needsRedraw = true;
-    });
   }
 
   loadCandles(data) {
