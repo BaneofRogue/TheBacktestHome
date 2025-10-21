@@ -64,7 +64,7 @@ export default class PriceRange {
 
     // exponential mapping for smooth multiplicative zoom
     // tiny k so small mouse moves = gentle zoom
-    const k = 0.00005;
+    const k = 0.0005;
     const zoomFactor = Math.exp(-deltaY * k); // negative sign reverses direction
 
     // compute new pxPerPrice & clamp to sane range
