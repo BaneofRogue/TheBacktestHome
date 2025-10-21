@@ -11,18 +11,9 @@ export default class PriceRange {
     this.tickPx = 50;
     this.zoomFactor = 1.2;
 
-    // Drag zoom
-    this.dragging = false;
-    this.dragStartY = 0;
-    this.pxPerPriceStart = 0;
-
     // Bind events
     this.canvas.style.cursor = 'ns-resize';
     this.canvas.addEventListener('wheel', e => this._onWheel(e));
-    this.canvas.addEventListener('mousedown', e => this._startDrag(e));
-    this.canvas.addEventListener('mousemove', e => this._onDrag(e));
-    this.canvas.addEventListener('mouseup', () => this._endDrag());
-    this.canvas.addEventListener('mouseleave', () => this._endDrag());
   }
 
   setRange(min, max) {
@@ -42,50 +33,6 @@ export default class PriceRange {
     this.topPrice = priceAtMouse + mouseY / this.pxPerPrice;
     if (this.chart) this.chart.needsRedraw = true;
   }
-
-  _startDrag(e) {
-    if (e.button !== 0) return;
-    e.preventDefault();
-
-    this.dragging = true;
-    this.dragStartY = e.clientY;
-
-    // save values at drag start
-    this.pxPerPriceStart = this.pxPerPrice;
-    this.topPriceStart = this.topPrice;
-
-    this.canvas.style.cursor = 'grabbing';
-  }
-
-  _onDrag(e) {
-    if (!this.dragging) return;
-
-    const deltaY = e.clientY - this.dragStartY; // positive = dragging down
-
-    // exponential mapping for smooth multiplicative zoom
-    // tiny k so small mouse moves = gentle zoom
-    const k = 0.0005;
-    const zoomFactor = Math.exp(-deltaY * k); // negative sign reverses direction
-
-    // compute new pxPerPrice & clamp to sane range
-    let newPxPerPrice = this.pxPerPriceStart * zoomFactor;
-    newPxPerPrice = Math.max(0.1, Math.min(200, newPxPerPrice));
-
-    // keep vertical center fixed
-    const centerY = this.canvas.height / 2;
-    const centerPriceAtStart = this.topPriceStart - centerY / this.pxPerPriceStart;
-    this.pxPerPrice = newPxPerPrice;
-    this.topPrice = centerPriceAtStart + centerY / this.pxPerPrice;
-
-    if (this.chart) this.chart.needsRedraw = true;
-  }
-
-  _endDrag(e) {
-    this.dragging = false;
-    this.canvas.style.cursor = 'ns-resize';
-  }
-
-
 
   resetScale() {
     this.pxPerPrice = 10;
