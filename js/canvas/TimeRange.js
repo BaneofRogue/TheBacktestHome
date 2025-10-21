@@ -16,7 +16,6 @@ export default class TimeRange {
   _onWheel(e) {
     e.preventDefault();
     const mouseX = e.offsetX;
-
     const timeAtMouse = this.leftTime + mouseX / this.pxPerTime;
 
     if (e.deltaY < 0) this.pxPerTime *= this.zoomFactor;
@@ -25,9 +24,16 @@ export default class TimeRange {
     this.leftTime = timeAtMouse - mouseX / this.pxPerTime;
 
     if (this.chart) {
-      this.chart.needsRedraw = true;
+        // Sync chart.offsetX in index → pixels units
+        const firstCandle = this.candles.data[0];
+        const candleWidth = this.chart.candles.candleWidth + this.chart.candles.candleSpacing;
+        let leftIndex = this.candles.data.findIndex(c => c.timestamp >= this.leftTime);
+        if (leftIndex === -1) leftIndex = 0;
+        this.chart.offsetX = -leftIndex * candleWidth;
+        this.chart.needsRedraw = true;
     }
-  }
+}
+
 
   setRange(minTime, maxTime) {
     this.leftTime = minTime;
