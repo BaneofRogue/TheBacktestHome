@@ -5,9 +5,8 @@ export default class TimeRange {
     this.chart = chart;
     this.candles = chart?.candles || null;
 
-    this.pxPerTime = 10;
+    this.pxPerTime = 0.05;  // pixels per second
     this.leftTime = 0;
-    this.tickPx = 100;
     this.zoomFactor = 1.2;
 
     this.canvas.style.cursor = 'ew-resize';
@@ -25,16 +24,14 @@ export default class TimeRange {
 
     this.leftTime = timeAtMouse - mouseX / this.pxPerTime;
 
-    // sync ChartCanvas offsetX
     if (this.chart) {
-        this.chart.offsetX = (this.leftTime - this.candles.data[0].timestamp) * this.pxPerTime;
-        this.chart.needsRedraw = true;
+      this.chart.needsRedraw = true;
     }
   }
 
-  setRange(min, max) {
-    this.leftTime = min;
-    this.pxPerTime = this.canvas.width / (max - min);
+  setRange(minTime, maxTime) {
+    this.leftTime = minTime;
+    this.pxPerTime = this.canvas.width / (maxTime - minTime);
     if (this.chart) this.chart.needsRedraw = true;
   }
 
@@ -54,41 +51,35 @@ export default class TimeRange {
     ctx.font = '12px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.setLineDash([2,2]);
+    ctx.setLineDash([2, 2]);
 
     if (!this.candles || this.candles.data.length === 0) return;
 
-    const offsetX = this.chart ? this.chart.offsetX : 0;
-    const leftTime = this.leftTime - offsetX / this.pxPerTime;
+    const leftTime = this.leftTime;
     const rightTime = leftTime + width / this.pxPerTime;
 
     const tickStep = this._getTickStep(leftTime, rightTime);
-
-    // start drawing from first tick >= leftTime
     const startTick = Math.ceil(leftTime / tickStep) * tickStep;
 
     for (let t = startTick; t <= rightTime; t += tickStep) {
-        const x = (t - leftTime) * this.pxPerTime;
+      const x = (t - leftTime) * this.pxPerTime;
 
-        // vertical grid line
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
 
-        // timestamp label
-        const date = new Date(t * 1000);
-        const h = String(date.getHours()).padStart(2,'0');
-        const m = String(date.getMinutes()).padStart(2,'0');
-        ctx.fillText(`${h}:${m}`, x, 0);
+      const date = new Date(t * 1000);
+      const h = String(date.getHours()).padStart(2, '0');
+      const m = String(date.getMinutes()).padStart(2, '0');
+      ctx.fillText(`${h}:${m}`, x, 0);
     }
 
     ctx.restore();
-}
-
+  }
 
   _getTickStep(minTime, maxTime) {
-    const approxTicks = this.canvas.width / this.tickPx;
+    const approxTicks = this.canvas.width / 100;
     const roughStep = (maxTime - minTime) / approxTicks;
     const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
     const residual = roughStep / magnitude;

@@ -117,9 +117,11 @@ export default class ChartCanvas {
             this.offsetY,
             this.mainWidth,
             this.mainHeight,
-            this.priceRange, // pass entire object
-            this.mousePos
-            );
+            this.priceRange,
+            this.mousePos,
+            this.timeRange   // pass timeRange for zooming
+        );
+
 
 
         // draw price panel
