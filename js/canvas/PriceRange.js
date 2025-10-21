@@ -14,6 +14,7 @@ export default class PriceRange {
     // Bind events
     this.canvas.style.cursor = 'ns-resize';
     this.canvas.addEventListener('wheel', e => this._onWheel(e));
+    
   }
 
   setRange(min, max) {
