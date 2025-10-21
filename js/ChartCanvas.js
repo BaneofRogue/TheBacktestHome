@@ -24,7 +24,7 @@ export default class ChartCanvas {
 
     // modular components
     this.crosshair = new Crosshair();
-    this.timeRange = new TimeRange(this.timeCanvas, this, this.candles);
+    this.timeRange = new TimeRange(this.timeCanvas, this);
     this.priceRange = new PriceRange(this.priceCanvas, this);
     this.candles = new Candles();
 
