@@ -49,3 +49,10 @@ html, body {
   display: block;
   background: #f0f0f0;
 }
+
+#timeCanvasWrapper {
+  height: 60px; /* or whatever you want for the time axis */
+}
+#timeCanvas {
+  width: 100%;
+}

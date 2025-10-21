@@ -1,11 +1,14 @@
 import Crosshair from './canvas/Crosshair.js';
 import PriceRange from './canvas/PriceRange.js';
 import Candles from './canvas/Candles.js';
+import TimeRange from './canvas/TimeRange.js';
 
 export default class ChartCanvas {
-  constructor(mainId, priceId) {
+  constructor(mainId, priceId, timeId) {
     this.mainCanvas = document.getElementById(mainId);
     this.priceCanvas = document.getElementById(priceId);
+
+    this.timeCanvas = document.getElementById(timeId);
 
     this.mainCtx = this.mainCanvas.getContext('2d');
     this.priceCtx = this.priceCanvas.getContext('2d');
@@ -22,6 +25,7 @@ export default class ChartCanvas {
 
     // modular components
     this.crosshair = new Crosshair();
+    this.timeRange = new TimeRange(this.timeCanvas, this, this.candles);
     this.priceRange = new PriceRange(this.priceCanvas, this);
     this.candles = new Candles();
 
@@ -41,6 +45,10 @@ export default class ChartCanvas {
     const priceWrapper = this.priceCanvas.parentElement;
     this.priceCanvas.width = priceWrapper.clientWidth;
     this.priceCanvas.height = priceWrapper.clientHeight;
+
+    const timeWrapper = this.timeCanvas.parentElement;
+    this.timeCanvas.width = timeWrapper.clientWidth;
+    this.timeCanvas.height = 60;
   }
 
   _bindEvents() {
@@ -117,6 +125,9 @@ export default class ChartCanvas {
 
         // draw price panel
         this.priceRange.draw();
+
+        // draw time panel
+        this.timeRange.draw();
 
         // draw crosshair
         this.crosshair.draw(ctx, this.mousePos, this.mainWidth, this.mainHeight);
