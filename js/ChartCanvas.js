@@ -67,9 +67,16 @@ export default class ChartCanvas {
         this.mousePos.y = e.clientY - rect.top;
 
         if (this.isDragging) {
-            this.offsetX = e.clientX - this.dragStart.x;
+            const deltaX = e.clientX - this.dragStart.x;
+            this.offsetX = deltaX;
 
-            // vertical drag adjusts topPrice proportionally
+            // update TimeRange offset
+            if (this.timeRange) {
+                this.timeRange.startTime = -this.offsetX / this.timeRange.pxPerTime;
+                this.timeRange.endTime = this.timeRange.startTime + this.timeCanvas.width / this.timeRange.pxPerTime;
+            }
+
+            // vertical drag adjusts price
             const deltaY = e.clientY - this.dragStart.y;
             const priceDelta = deltaY / this.priceRange.pxPerPrice;
             this.priceRange.topPrice = this.priceRange.topPriceStart + priceDelta;
@@ -106,6 +113,7 @@ export default class ChartCanvas {
     const start = this.candles.data[0].timestamp;
     const end = this.candles.data[this.candles.data.length-1].timestamp;
     this.timeRange.setRange(start, end);
+    this.offsetX = 0; // reset offset
 
     this.needsRedraw = true;
 }
