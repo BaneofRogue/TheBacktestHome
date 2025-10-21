@@ -1,3 +1,6 @@
+import ChartCanvas from './ChartCanvas.js';
+import { getTradingDates, findIndexByTime, getPreviousTradingDates, pickRandomDate } from './dates.js';
+
 const chart = new ChartCanvas('mainCanvas', 'priceCanvas');
 chart.raw1mData = []; // store 1m data here
 
