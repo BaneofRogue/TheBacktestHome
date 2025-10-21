@@ -1,3 +1,12 @@
+/*
+  DO NOT MODIFY THIS FILE DIRECTLY!
+  This section has been completed and shall be preserved.
+  This is a very important file for the functioning of the application.
+  Any changes made here may affect the overall behavior of the application.
+  Please ensure that you understand the implications of modifying this file
+  before proceeding with any changes.
+*/
+
 export default class PriceRange {
   constructor(canvas, chart = null) {
     this.canvas = canvas;
@@ -14,7 +23,7 @@ export default class PriceRange {
     // Bind events
     this.canvas.style.cursor = 'ns-resize';
     this.canvas.addEventListener('wheel', e => this._onWheel(e));
-    
+
   }
 
   setRange(min, max) {
