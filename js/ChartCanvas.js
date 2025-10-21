@@ -86,16 +86,24 @@ export default class ChartCanvas {
   // Aggregate and load candles
   loadCandles(data, timeframe) {
     const aggregated = aggregateCandles(data, timeframe);
+
+    // print first 10 of original 1m data
+    console.log('Original 1m data (first 10):', data.slice(0, 10));
+
+    // print first 10 of aggregated data
+    console.log(`Aggregated ${timeframe}m data (first 10):`, aggregated.slice(0, 10));
+
     this.candles.setData(aggregated);
 
     let min = Infinity, max = -Infinity;
-    for (const c of data) {
-    if (c.low < min) min = c.low;
-    if (c.high > max) max = c.high;
+    for (const c of aggregated) { // compute min/max from aggregated
+        if (c.low < min) min = c.low;
+        if (c.high > max) max = c.high;
     }
     this.priceRange.setRange(min, max);
     this.needsRedraw = true;
-  }
+}
+
 
   _drawLoop() {
     if (this.needsRedraw) {
