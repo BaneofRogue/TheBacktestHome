@@ -107,7 +107,8 @@ export default class ChartCanvas {
             this.offsetY,
             this.mainWidth,
             this.mainHeight,
-            this.priceRange // pass entire object
+            this.priceRange, // pass entire object
+            this.mousePos
             );
 
 
