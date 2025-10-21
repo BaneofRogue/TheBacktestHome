@@ -87,12 +87,6 @@ export default class ChartCanvas {
   loadCandles(data, timeframe) {
     const aggregated = aggregateCandles(data, timeframe);
 
-    // print first 10 of original 1m data
-    console.log('Original 1m data (first 10):', data.slice(0, 10));
-
-    // print first 10 of aggregated data
-    console.log(`Aggregated ${timeframe}m data (first 10):`, aggregated.slice(0, 10));
-
     this.candles.setData(aggregated);
 
     let min = Infinity, max = -Infinity;

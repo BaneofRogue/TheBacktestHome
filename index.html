@@ -14,6 +14,8 @@
       <option value="BTCUSD-1m.json">BTCUSD (1m)</option>
     </select>
 
+    <button id="load">Load Random Date!</button>
+
     <label for="timeframe">Timeframe:</label>
     <select id="timeframe">
       <option value="1">1m</option>
@@ -22,7 +24,24 @@
       <option value="60">1h</option>
     </select>
 
-    <button id="load">Load</button>
+    <label for="tickspeed">Tick Speed:</label>
+    <select id="tickspeed">
+      <option value="1">1s</option>
+      <option value="0.5">0.5s</option>
+      <option value="0.25">0.25s</option>
+      <option value="0.1">0.1s</option>
+    </select>
+
+    <label for="tickframe">Tick Value:</label>
+    <select id="tickframe">
+      <option value="1">1m</option>
+      <option value="5">5m</option>
+      <option value="15">15m</option>
+    </select>
+
+    <button id="play">Play</button>
+    <button id="pause">Pause</button>
+    <button id="reverse">Reverse</button>
   </div>
 
   <div id="chartContainer">
