@@ -7,7 +7,6 @@ export default class ChartCanvas {
   constructor(mainId, priceId, timeId) {
     this.mainCanvas = document.getElementById(mainId);
     this.priceCanvas = document.getElementById(priceId);
-
     this.timeCanvas = document.getElementById(timeId);
 
     this.mainCtx = this.mainCanvas.getContext('2d');
