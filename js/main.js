@@ -12,21 +12,21 @@ loadBtn.addEventListener('click', async () => {
   const timeframe = parseInt(timeframeSelect.value, 10);
 
   const response = await fetch(`data/${symbol}`);
-  const data = await response.json();
+  const rawData = await response.json();
 
-  chart.loadCandles(data, timeframe);
-
-  const tradingDates = getTradingDates(data);
+  const tradingDates = getTradingDates(rawData);
   const randomDate = pickRandomDate(tradingDates);
-
   const prev5Dates = getPreviousTradingDates(tradingDates, randomDate, 5);
+  const indices = prev5Dates.map(date => findIndexByTime(rawData, date, '09:30:00')).filter(i => i !== -1);
 
-  const indices = prev5Dates.map(date => findIndexByTime(data, date, '09:30:00'))
-                             .filter(i => i !== -1);
+  const startIdx = indices[0];
+  const endIdx = indices[indices.length - 1] + 1;
+  const newData = rawData.slice(startIdx, endIdx);
+
+  chart.loadCandles(newData, timeframe);
+  chart.savedIndices = indices;
 
   console.log('Random date selected:', randomDate);
   console.log('Previous 5 trading days including selected:', prev5Dates);
   console.log('Indices at 9:30AM:', indices);
-
-  chart.savedIndices = indices;
 });
