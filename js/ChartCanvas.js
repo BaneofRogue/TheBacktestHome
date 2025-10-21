@@ -24,9 +24,9 @@ export default class ChartCanvas {
 
     // modular components
     this.crosshair = new Crosshair();
+    this.timeRange = new TimeRange(this.timeCanvas, this);
     this.priceRange = new PriceRange(this.priceCanvas, this);
     this.candles = new Candles();
-    this.timeRange = new TimeRange(this.timeCanvas, this);
 
     this._bindEvents();
     this._drawLoop();
@@ -54,13 +54,11 @@ export default class ChartCanvas {
     window.addEventListener('resize', () => this._resizeCanvas());
 
     this.mainCanvas.addEventListener('mousedown', e => {
-        if (e.button === 0) {
-            this.isDragging = true;
-            this.dragStart.x = e.clientX;
-            this.dragStart.y = e.clientY;
-            this.priceRange.topPriceStart = this.priceRange.topPrice; // vertical drag base
-            this.timeRangeLeftStart = this.timeRange.leftTime;        // store initial leftTime
-        }
+      if (e.button === 0) {
+        this.isDragging = true;
+        this.dragStart.x = e.clientX - this.offsetX;
+        this.dragStart.y = e.clientY - this.offsetY;
+      }
     });
 
     this.mainCanvas.addEventListener('mousemove', e => {
@@ -69,17 +67,22 @@ export default class ChartCanvas {
         this.mousePos.y = e.clientY - rect.top;
 
         if (this.isDragging) {
-            // Horizontal drag updates leftTime
-            const deltaPx = e.clientX - this.dragStart.x;
-            const deltaTime = -deltaPx / this.timeRange.pxPerTime;
-            this.timeRange.leftTime = this.timeRangeLeftStart + deltaTime;
+            this.offsetX = e.clientX - this.dragStart.x;
 
-            // Vertical drag updates topPrice
+            // vertical drag adjusts topPrice proportionally
             const deltaY = e.clientY - this.dragStart.y;
             const priceDelta = deltaY / this.priceRange.pxPerPrice;
             this.priceRange.topPrice = this.priceRange.topPriceStart + priceDelta;
+        }
+        this.needsRedraw = true;
+    });
 
-            this.needsRedraw = true;
+    this.mainCanvas.addEventListener('mousedown', e => {
+        if (e.button === 0) {
+            this.isDragging = true;
+            this.dragStart.x = e.clientX - this.offsetX;
+            this.dragStart.y = e.clientY;
+            this.priceRange.topPriceStart = this.priceRange.topPrice; // store initial top
         }
     });
 
@@ -99,6 +102,11 @@ export default class ChartCanvas {
         if (c.high > max) max = c.high;
     }
     this.priceRange.setRange(min, max);
+
+    const start = this.candles.data[0].timestamp;
+    const end = this.candles.data[this.candles.data.length-1].timestamp;
+    this.timeRange.setRange(start, end);
+
     this.needsRedraw = true;
 }
 
@@ -114,11 +122,9 @@ export default class ChartCanvas {
             this.offsetY,
             this.mainWidth,
             this.mainHeight,
-            this.priceRange,
-            this.mousePos,
-            this.timeRange   // pass timeRange for zooming
-        );
-
+            this.priceRange, // pass entire object
+            this.mousePos
+            );
 
 
         // draw price panel

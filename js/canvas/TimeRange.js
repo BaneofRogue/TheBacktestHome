@@ -3,41 +3,37 @@ export default class TimeRange {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.chart = chart;
-    this.candles = chart?.candles || null;
 
-    this.pxPerTime = 0.05;  // pixels per second
-    this.leftTime = 0;
+    // X-axis scale
+    this.pxPerTime = 2; // pixels per second (or ms, depends on timestamp units)
+    this.startTime = 0; // timestamp of the left edge
+    this.endTime = 60;  // timestamp of the right edge (seconds after start)
+    this.tickPx = 50;
     this.zoomFactor = 1.2;
 
     this.canvas.style.cursor = 'ew-resize';
     this.canvas.addEventListener('wheel', e => this._onWheel(e));
   }
 
+  setRange(start, end) {
+    this.startTime = start;
+    this.endTime = end;
+    const totalSeconds = end - start;
+    this.pxPerTime = this.canvas.width / totalSeconds;
+    if (this.chart) this.chart.needsRedraw = true;
+  }
+
   _onWheel(e) {
     e.preventDefault();
     const mouseX = e.offsetX;
-    const timeAtMouse = this.leftTime + mouseX / this.pxPerTime;
+    const timeAtMouse = this.startTime + mouseX / this.pxPerTime;
 
-    if (e.deltaY < 0) this.pxPerTime *= this.zoomFactor;
-    else this.pxPerTime /= this.zoomFactor;
+    if (e.deltaY < 0) this.pxPerTime *= this.zoomFactor; // zoom in
+    else this.pxPerTime /= this.zoomFactor;              // zoom out
 
-    this.leftTime = timeAtMouse - mouseX / this.pxPerTime;
+    this.startTime = timeAtMouse - mouseX / this.pxPerTime;
+    this.endTime = this.startTime + this.canvas.width / this.pxPerTime;
 
-    if (this.chart) {
-        // Sync chart.offsetX in index → pixels units
-        const firstCandle = this.candles.data[0];
-        const candleWidth = this.chart.candles.candleWidth + this.chart.candles.candleSpacing;
-        let leftIndex = this.candles.data.findIndex(c => c.timestamp >= this.leftTime);
-        if (leftIndex === -1) leftIndex = 0;
-        this.chart.offsetX = -leftIndex * candleWidth;
-        this.chart.needsRedraw = true;
-    }
-}
-
-
-  setRange(minTime, maxTime) {
-    this.leftTime = minTime;
-    this.pxPerTime = this.canvas.width / (maxTime - minTime);
     if (this.chart) this.chart.needsRedraw = true;
   }
 
@@ -59,34 +55,31 @@ export default class TimeRange {
     ctx.textBaseline = 'top';
     ctx.setLineDash([2, 2]);
 
-    if (!this.candles || this.candles.data.length === 0) return;
+    const tickSeconds = this._getTickStep();
+    const startTick = Math.floor(this.startTime / tickSeconds) * tickSeconds;
 
-    const leftTime = this.leftTime;
-    const rightTime = leftTime + width / this.pxPerTime;
-
-    const tickStep = this._getTickStep(leftTime, rightTime);
-    const startTick = Math.ceil(leftTime / tickStep) * tickStep;
-
-    for (let t = startTick; t <= rightTime; t += tickStep) {
-      const x = (t - leftTime) * this.pxPerTime;
-
+    for (let t = startTick; t <= this.endTime; t += tickSeconds) {
+      const x = (t - this.startTime) * this.pxPerTime;
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, height);
       ctx.stroke();
 
+      // format HH:MM:SS
       const date = new Date(t * 1000);
-      const h = String(date.getHours()).padStart(2, '0');
-      const m = String(date.getMinutes()).padStart(2, '0');
-      ctx.fillText(`${h}:${m}`, x, 0);
+      const label = `${date.getUTCHours().toString().padStart(2, '0')}:${date.getUTCMinutes().toString().padStart(2, '0')}`;
+      ctx.fillText(label, x, 2);
     }
 
     ctx.restore();
   }
 
-  _getTickStep(minTime, maxTime) {
-    const approxTicks = this.canvas.width / 100;
-    const roughStep = (maxTime - minTime) / approxTicks;
+  _getTickStep() {
+    const approxTicks = this.canvas.width / this.tickPx;
+    const timeRange = this.endTime - this.startTime;
+    const roughStep = timeRange / approxTicks;
+
+    // nice round seconds
     const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
     const residual = roughStep / magnitude;
     let nice;
@@ -95,5 +88,12 @@ export default class TimeRange {
     else if (residual < 7) nice = 5;
     else nice = 10;
     return nice * magnitude;
+  }
+
+  resetScale() {
+    this.pxPerTime = 2;
+    this.startTime = 0;
+    this.endTime = 60;
+    if (this.chart) this.chart.needsRedraw = true;
   }
 }
