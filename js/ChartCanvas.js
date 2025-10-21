@@ -83,6 +83,7 @@ export default class ChartCanvas {
     this.mainCanvas.addEventListener('mouseleave', () => this.isDragging = false);
   }
 
+  // Aggregate and load candles
   loadCandles(data, timeframe) {
     const aggregated = aggregateCandles(data, timeframe);
     this.candles.setData(aggregated);
