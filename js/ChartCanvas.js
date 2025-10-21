@@ -128,7 +128,7 @@ export default class ChartCanvas {
     // Compute pxPerTime so each candle is 1–20 px wide
     const rangeSeconds = endTime - startTime;
     const pxPerTime = this.timeRange.canvas.width / rangeSeconds;
-    this.timeRange.pxPerTime = Math.min(20 / 60, Math.max(1 / 60, pxPerTime)); // keep candle width between 1–20px
+    this.timeRange.pxPerTime = Math.min(10 / 60, Math.max(1 / 60, pxPerTime)); // keep candle width between 1–20px
     this.timeRange.startTime = startTime;
     this.timeRange.endTime = endTime;
 
