@@ -46,50 +46,45 @@ export default class PriceRange {
   _startDrag(e) {
     if (e.button !== 0) return;
     e.preventDefault();
+
     this.dragging = true;
     this.dragStartY = e.clientY;
-    // save the values at the start of drag
+
+    // save values at drag start
     this.pxPerPriceStart = this.pxPerPrice;
     this.topPriceStart = this.topPrice;
+
     this.canvas.style.cursor = 'grabbing';
   }
 
   _onDrag(e) {
-    if (!this.dragging) {
-      this.canvas.style.cursor = 'ns-resize';
-      return;
-    }
+    if (!this.dragging) return;
 
-    const deltaY = e.clientY - this.dragStartY; // positive when dragging down
+    const deltaY = e.clientY - this.dragStartY; // positive = dragging down
 
-    // exponential mapping -> stable multiplicative zoom
-    // k controls sensitivity. Lower k = slower zoom.
-    const k = 0.001; // tune this (0.0005..0.002 typical). smaller = less sensitive
-    const zoomFactor = Math.exp(deltaY * k); // >1 when dragging down, <1 when dragging up
+    // exponential mapping for smooth multiplicative zoom
+    // tiny k so small mouse moves = gentle zoom
+    const k = 0.00005;
+    const zoomFactor = Math.exp(-deltaY * k); // negative sign reverses direction
 
-    // clamp resulting pxPerPrice to sane bounds
-    const newPxPerPrice = Math.max(0.05, Math.min(1000, this.pxPerPriceStart * zoomFactor));
+    // compute new pxPerPrice & clamp to sane range
+    let newPxPerPrice = this.pxPerPriceStart * zoomFactor;
+    newPxPerPrice = Math.max(0.1, Math.min(200, newPxPerPrice));
 
-    // price at the vertical center when drag started (fixed anchor)
+    // keep vertical center fixed
     const centerY = this.canvas.height / 2;
     const centerPriceAtStart = this.topPriceStart - centerY / this.pxPerPriceStart;
-
-    // compute new topPrice so centerPrice stays at centerY after scale change
     this.pxPerPrice = newPxPerPrice;
     this.topPrice = centerPriceAtStart + centerY / this.pxPerPrice;
-
-    if (this.topPrice - this.canvas.height / this.pxPerPrice < this.bottomLimit) {
-      // enforce bottom limit so we don't show prices below min
-      this.topPrice = this.bottomLimit + this.canvas.height / this.pxPerPrice;
-    }
 
     if (this.chart) this.chart.needsRedraw = true;
   }
 
-  _endDrag() {
+  _endDrag(e) {
     this.dragging = false;
     this.canvas.style.cursor = 'ns-resize';
   }
+
 
 
   resetScale() {
